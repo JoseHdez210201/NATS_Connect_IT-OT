@@ -1,59 +1,95 @@
-# NATS_Connect_IT-OT
+# NATS Connect IT–OT
 
----
+## Descripción
 
-##IT vs OT
+Este documento resume cómo NATS puede facilitar la comunicación entre los sistemas de Tecnología Operativa (OT) y Tecnología de la Información (IT). También presenta el papel del **Unified Namespace (UNS)** y de los contratos de datos para hacer que la información sea reutilizable.
 
-IT - Tecnologías de la información (oficina, toma de decisiones)
-OT - Tecnología operativa (equipos de producción)
+## IT vs. OT
 
----
+| Área | Descripción | Ejemplos |
+|---|---|---|
+| **IT (Tecnologías de la Información)** | Sistemas orientados a la gestión de información y la toma de decisiones. | Aplicaciones de oficina, paneles y analítica |
+| **OT (Tecnología Operativa)** | Sistemas y equipos que supervisan o controlan procesos físicos. | Máquinas, sensores y equipos de producción |
 
-##NATS - Broker (mensajes)
-Funciona como un radio, sintonizas el canal (señal) que deseas escuchar.
+## ¿Qué es NATS?
 
-##UNS (Unified NameSpace): Organiza nombres, contexto y reglas compartidas
+NATS es un *broker* de mensajes: permite que los sistemas publiquen información y que otros sistemas se suscriban para recibirla.
 
-NATS + UNS = Datos reutilizables
+Una forma sencilla de imaginarlo es como una radio: el publicador transmite en un canal y uno o varios consumidores se suscriben a ese canal.
 
-##Arquitectura de NATS:
+## ¿Qué es un UNS?
 
-Equipo → Gateway (Normalización) → NATS (distribución) → App final (panel, alarma, analítica)
+**UNS** (*Unified Namespace* o espacio de nombres unificado) es una estructura compartida para organizar nombres, contexto y reglas de los datos.
 
-##Métafora:
-Sistema nervioso digital
+> **NATS distribuye los mensajes; el UNS organiza la información.**  
+> Juntos, ayudan a que los datos puedan reutilizarse entre aplicaciones.
 
+## Arquitectura de referencia
+
+```text
+Equipo → Gateway (normalización) → NATS (distribución) → Aplicaciones
+```
+
+Las aplicaciones pueden incluir paneles, alarmas o sistemas de analítica.
+
+### Flujo de datos
+
+```text
 Sensores → Red + NATS → Aplicaciones
+```
 
-NATS: un publicador, varios consumidores
+Un gateway OT puede publicar datos en NATS y permitir que varios consumidores los reciban:
 
-Gateway OT → NATS → Panel, Alarma, analítica
+```text
+Gateway OT → NATS → Panel
+                   → Alarma
+                   → Analítica
+```
 
-##Normalización: planta.línea.equipo.nombre
+Este modelo permite que un publicador envíe información a varios consumidores sin establecer una conexión independiente con cada uno.
 
-Ejemplo: mx.ensamble.remachadora.contador1
+## Convención para nombres
 
-Ejemplo de mensaje:
+Una estructura posible para los nombres es:
+
+```text
+planta.línea.equipo.nombre
+```
+
+Ejemplo:
+
+```text
+mx.ensamble.remachadora.contador1
+```
+
+La convención debería ser coherente y compartida entre los sistemas que producen y consumen los datos.
+
+## Ejemplo de mensaje
+
+```json
 {
-	"temperatura_c":72,4,
-	"nivel_pct":63,
-	"bomba_activa": true
+  "temperatura_c": 72.4,
+  "nivel_pct": 63,
+  "bomba_activa": true
 }
+```
 
-##Y MQTT?
+> **Nota:** En JSON, los decimales se escriben con punto (`72.4`), no con coma.
 
-Se puede usar en microcontroladores, baja demanda de recursos, conexiones punto a punto.
+## NATS y MQTT
 
-##NATS ventajas:
-- Conexiones de uno (emisor) a muchos (suscriptores)
-- Red de comunicación distribuida
-- Persistencia de mensajes (opcional) con JetStream
+MQTT puede ser una opción adecuada para dispositivos con recursos limitados, como microcontroladores, y para ciertos escenarios de comunicación punto a punto. La elección entre NATS y MQTT depende de los requisitos de arquitectura, dispositivos y comunicación.
 
----
+## Ventajas de NATS
 
-##Tres ideas principales:
-1. NATS: Distribuye mensajes
-2. UNS: Organiza la información
-3. Contrato: Da significado
+- Permite distribuir mensajes de un emisor a varios suscriptores.
+- Facilita arquitecturas de comunicación distribuida.
+- Puede ofrecer persistencia de mensajes mediante **JetStream**.
 
-"Un dato puede servir a muchos equipos sin que todos dependan entre sí".
+## Conceptos clave
+
+1. **NATS** distribuye los mensajes.
+2. **UNS** organiza la información y su contexto.
+3. **El contrato de datos** define el significado y la estructura de los datos.
+
+> «Un dato puede servir a muchos equipos sin que todos dependan entre sí».
